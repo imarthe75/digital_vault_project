@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bóveda Digital</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Bóveda Digital</h1>
+
+        <section id="upload-section">
+            <h2>Subir Archivo</h2>
+            <form id="uploadForm">
+                <label for="uploadFile">Seleccionar Archivo:</label>
+                <input type="file" id="uploadFile" name="file" required><br><br>
+
+                <label for="uploadUserId">ID de Usuario (para pruebas):</label>
+                <input type="text" id="uploadUserId" name="user_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+                    required><br><br>
+
+                <label for="uploadMetadata">Metadata (JSON opcional):</label>
+                <textarea id="uploadMetadata" name="metadata" rows="4" cols="50"
+                    placeholder='{"description": "Documento importante", "tags": ["personal", "contrato"]}'></textarea><br><br>
+
+                <button type="submit">Subir Archivo</button>
+            </form>
+            <p id="uploadStatus"></p>
+        </section>
+
+        <hr>
+
+        <section id="download-section">
+            <h2>Descargar Archivo</h2>
+            <form id="downloadForm">
+                <label for="downloadFileId">ID de Archivo:</label>
+                <input type="text" id="downloadFileId" required><br><br>
+                <label for="downloadUserId">ID de Usuario (para pruebas):</label>
+                <input type="text" id="downloadUserId" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11" required><br><br>
+                <button type="submit">Descargar Archivo</button>
+            </form>
+            <p id="downloadStatus"></p>
+        </section>
+
+        <hr>
+
+        <section id="delete-section">
+            <h2>Eliminar Archivo</h2>
+            <form id="deleteForm">
+                <label for="deleteFileId">ID de Archivo:</label>
+                <input type="text" id="deleteFileId" required><br><br>
+                <label for="deleteUserId">ID de Usuario (para pruebas):</label>
+                <input type="text" id="deleteUserId" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11" required><br><br>
+                <button type="submit">Eliminar Archivo</button>
+            </form>
+            <p id="deleteStatus"></p>
+        </section>
+
+        <hr>
+
+        <section id="list-section">
+            <h2>Archivos de Usuario</h2>
+            <form id="listForm">
+                <label for="listUserId">ID de Usuario:</label>
+                <input type="text" id="listUserId" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11" required><br><br>
+                <button type="submit">Listar Archivos</button>
+            </form>
+            <div id="fileList"></div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

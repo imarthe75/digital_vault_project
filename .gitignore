@@ -1,0 +1,22 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de datos o logs
+*.db
+*.log
+*.sqlite3
+
+# Variables de entorno sensibles (¡CRUCIAL!)
+.env
+
+# Docker
+*.env # Si tus .env están fuera de .gitignore
+volumes/ # Si los volúmenes de Docker no se manejan fuera del repo

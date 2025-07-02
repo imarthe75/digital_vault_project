@@ -1,0 +1,6 @@
+flask
+psycopg2-binary
+boto3
+cryptography
+python-dotenv
+gunicorn # Para un servidor de producción simple, aunque Flask/FastAPI dev server es suficiente para local.

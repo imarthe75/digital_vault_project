@@ -1,0 +1,66 @@
+version: "3.8" # Puedes mantenerlo o eliminarlo, el warning no es crítico
+services:
+  # postgres_db: # Si estás usando tu PostgreSQL local, MANTÉN ESTA SECCIÓN COMENTADA o ELIMÍNALA
+  #   image: postgres:15
+  #   restart: always
+  #   environment:
+  #     POSTGRES_DB: digital_vault_db
+  #     POSTGRES_USER: vault_user
+  #     POSTGRES_PASSWORD: supersecurepassword
+  #   ports:
+  #     - "5432:5432" # Expone el puerto 5432 al host
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U vault_user -d digital_vault_db"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+
+  minio:
+    image: quay.io/minio/minio:latest
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001" # Puerto de la UI de MinIO
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    command: server --console-address ":9001" /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  zookeeper: # Nuevo servicio para Zookeeper
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    restart: always
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka: # Nuevo servicio para Kafka
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    restart: always
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 # Para desarrollo, en prod > 1
+    depends_on:
+      - zookeeper # Kafka depende de Zookeeper
+
+volumes:
+  # postgres_data: # Comenta o elimina si no usas el servicio postgres_db
+  minio_data:
