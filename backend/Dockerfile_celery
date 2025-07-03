@@ -1,0 +1,17 @@
+# backend/Dockerfile_celery
+FROM python:3.12.10-slim-bookworm
+# O usa python:3.12.10-slim-bookworm si prefieres 3.12.10
+
+WORKDIR /app
+
+# Copia solo los archivos de requisitos para el paso de instalación
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copia el resto de tu código de la app
+COPY . .
+
+# Comando para ejecutar el Celery worker
+# --loglevel=info para ver logs de Celery
+# --pool=prefork o solo --pool=solo para desarrollo (prefork es mejor para rendimiento)
+CMD ["celery", "-A", "tasks", "worker", "--loglevel=info"]

@@ -1,6 +1,6 @@
-version: "3.8" # Puedes mantenerlo o eliminarlo, el warning no es crítico
+version: "3.8"
 services:
-  # postgres_db: # Si estás usando tu PostgreSQL local, MANTÉN ESTA SECCIÓN COMENTADA o ELIMÍNALA
+  # postgres_db: # Descomenta o ajusta si usas PostgreSQL en Docker
   #   image: postgres:15
   #   restart: always
   #   environment:
@@ -8,7 +8,7 @@ services:
   #     POSTGRES_USER: vault_user
   #     POSTGRES_PASSWORD: supersecurepassword
   #   ports:
-  #     - "5432:5432" # Expone el puerto 5432 al host
+  #     - "5432:5432"
   #   volumes:
   #     - postgres_data:/var/lib/postgresql/data
   #   healthcheck:
@@ -22,7 +22,7 @@ services:
     restart: always
     ports:
       - "9000:9000"
-      - "9001:9001" # Puerto de la UI de MinIO
+      - "9001:9001"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -34,33 +34,80 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
-
-  zookeeper: # Nuevo servicio para Zookeeper
+  zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper
     container_name: zookeeper
-    restart: always
     ports:
       - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
-  kafka: # Nuevo servicio para Kafka
-    image: confluentinc/cp-kafka:7.5.0
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0 # O la versión que uses
+    hostname: kafka
     container_name: kafka
-    restart: always
     ports:
-      - "9092:9092"
+      - "9092:9092" # <--- Asegúrate de que este puerto esté expuesto
+      - "29092:29092" # Para comunicaciones internas entre contenedores
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 # Para desarrollo, en prod > 1
+      # ESTA LÍNEA ES CRÍTICA:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     depends_on:
-      - zookeeper # Kafka depende de Zookeeper
+      - zookeeper
+    networks:
+      - default # Asegúrate de que Kafka esté en la misma red que tus otros servicios.
+
+  valkey: # ¡NUEVO SERVICIO PARA VALKEY!
+    image: valkey/valkey:7.2.5-alpine # Última versión estable de Valkey 7.2
+    container_name: valkey
+    restart: always
+    ports:
+      - "6379:6379" # Puerto por defecto de Valkey
+
+  celery_worker: # ¡NUEVO SERVICIO PARA CELERY WORKER!
+    build:
+      context: ./backend # Construye la imagen desde la carpeta 'backend'
+      dockerfile: Dockerfile_celery # Usa un Dockerfile específico para el worker
+    container_name: celery_worker
+    restart: always
+    environment:
+      # Asegúrate de que estas variables sean las mismas que usará tu worker
+      CELERY_BROKER_URL: "redis://valkey:6379/0" # Valkey como broker
+      CELERY_RESULT_BACKEND: "redis://valkey:6379/0" # Valkey para almacenar resultados
+      CEPH_ENDPOINT_URL: http://minio:9000 # ¡CAMBIO CRÍTICO AQUÍ!
+      #CEPH_ENDPOINT_URL: ${CEPH_ENDPOINT_URL}
+      CEPH_ACCESS_KEY: ${CEPH_ACCESS_KEY}
+      CEPH_SECRET_KEY: ${CEPH_SECRET_KEY}
+      CEPH_BUCKET_NAME: ${CEPH_BUCKET_NAME}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: host.docker.internal # ¡IMPORTANTE! Para que el worker se conecte a la DB del host
+      # POSTGRES_HOST: ${POSTGRES_HOST} # Si usas postgres_db en Docker, será 'postgres_db'
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      SYSTEM_MASTER_KEY: ${SYSTEM_MASTER_KEY}
+    volumes:
+      - ./backend:/app # Monta tu código backend en el contenedor
+    depends_on:
+      - valkey # El worker depende de Valkey
+      # - postgres_db # Descomenta si tu DB también está en Docker
+      - minio # Si las tareas de Celery interactúan con MinIO
+    networks:
+      - default
 
 volumes:
-  # postgres_data: # Comenta o elimina si no usas el servicio postgres_db
+  # postgres_data: # Descomenta si usas el servicio postgres_db
   minio_data:
+
+networks:
+  default: # Define tu red predeterminada si no la tienes ya
+    driver: bridge

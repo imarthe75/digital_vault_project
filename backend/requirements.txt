@@ -1,6 +1,11 @@
-flask
-psycopg2-binary
-boto3
-cryptography
+Flask
 python-dotenv
-gunicorn # Para un servidor de producción simple, aunque Flask/FastAPI dev server es suficiente para local.
+cryptography
+boto3
+psycopg2-binary
+Flask-Cors
+confluent-kafka
+gunicorn # Si lo usas con WSL/Linux
+waitress # Si lo usas con Windows
+celery # ¡NUEVA!
+redis # ¡NUEVA! (para valkey client)
