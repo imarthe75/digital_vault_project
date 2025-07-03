@@ -1,4 +1,5 @@
 Sistema de Bóveda Digital con Ceph, Python y PostgreSQL
+
 Este sistema permitirá el almacenamiento seguro de archivos encriptados utilizando Ceph como backend de almacenamiento, gestionando la metadata en PostgreSQL y exponiendo una API RESTful para la interacción.
 
 Digital Vault es una solución robusta y moderna para la gestión segura y descentralizada de archivos digitales. Diseñado con una arquitectura de microservicios y tecnologías de vanguardia, este proyecto demuestra cómo construir un sistema escalable y resiliente que prioriza la seguridad, la asincronía y la eficiencia en el manejo de datos sensibles.
