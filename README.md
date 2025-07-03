@@ -46,20 +46,6 @@ Celery (con Valkey/Redis o RabbitMQ como Broker):
 Para qué: Es un sistema de colas de tareas distribuidas. Perfecto para las tareas asíncronas que hablamos de poner en tu consumidor de Kafka.
 Beneficio: Te permite ejecutar tareas que consumen mucho tiempo (como escaneo de virus, transcodificación, generación de miniaturas) en procesos separados, liberando tu API para responder rápidamente a los usuarios. Los eventos de Kafka pueden disparar estas tareas de Celery.
 
-Arquitectura General
-+----------------+       +-------------------+       +-------------------+
-|   Sistema Web  | <---> |   Servicio Backend  | <---> |    Base de Datos  |
-| (Frontend/UI)  |       |  (Python/Flask/   |       |    (PostgreSQL)   |
-|                |       |     FastAPI)      |       |  - Metadata Archivos
-+----------------+       +---------|---------+       |  - Usuarios
-                                   |                   +-------------------+
-                                   |
-                                   | S3 API (boto3)
-                                   V
-                          +----------------+
-                          |      Ceph      |
-                          | (Rados Gateway)|
-                          +----------------+
 Módulo de Encriptación/Desencriptación
 Utilizar la librería cryptography.fernet o cryptography.hazmat.primitives.ciphers para una encriptación simétrica robusta (ej. AES en modo GCM).
 Clave de encriptación por archivo: Cada archivo debe tener una clave de encriptación única. Esto es crucial para la seguridad: si una clave se compromete, solo un archivo se ve afectado.
