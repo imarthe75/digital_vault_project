@@ -21,16 +21,13 @@ Diseño Modular y Escalable: La arquitectura de microservicios permite escalar c
 Este proyecto es ideal para desarrolladores y equipos que buscan entender o implementar:
 
 Arquitecturas de microservicios.
-
 Patrones de cifrado de datos en tránsito y en reposo.
-
 Uso de almacenamiento de objetos distribuido.
-
 Sistemas de colas de mensajes (Kafka) para comunicación asíncrona.
-
 Procesamiento de tareas en segundo plano (Celery).
-
 Despliegues con Docker Compose para entornos de desarrollo.
+
+![image](https://github.com/user-attachments/assets/9cc1be91-94df-4544-af57-6c7839f47878)
 
 ¡Explora el código, contribuye o adáptalo a tus propias necesidades!
 
@@ -39,9 +36,9 @@ Sigue estos pasos para poner en marcha el proyecto en tu entorno de desarrollo.
 
 1. Clonar el Repositorio
 Bash
-
 git clone https://github.com/tu_usuario/digital_vault_project.git
 cd digital_vault_project
+
 2. Configurar Variables de Entorno
 Crea un archivo .env en la raíz del proyecto (junto a docker-compose.yml) y configura las siguientes variables. Puedes usar nuevo1.env como plantilla si lo tienes.
 
@@ -80,20 +77,15 @@ docker-compose up -d --build
 Esto levantará los siguientes servicios:
 
 zookeeper (para Kafka)
-
 kafka (broker de mensajes)
-
 valkey (broker y backend de resultados para Celery)
-
 minio (almacenamiento de objetos compatible con S3)
-
 celery_worker (procesa tareas asíncronas)
 
 4. Configurar PostgreSQL
 Si aún no lo has hecho:
 
 Asegúrate de que tu instancia de PostgreSQL nativa en Windows esté corriendo y acepte conexiones en el puerto 5432.
-
 Crea la base de datos digital_vault_db y el usuario dvu con la contraseña testpass.
 
 Puedes hacerlo conectándote a psql (o pgAdmin) y ejecutando:
@@ -129,29 +121,24 @@ La aplicación Flask se ejecutará en http://127.0.0.1:5000 (o http://localhost:
 El proyecto se organiza de la siguiente manera:
 
 /: Contiene el docker-compose.yml, .env y el Dockerfile principal.
-
 backend/: Contiene la lógica del backend de Flask.
-
 app.py: La aplicación Flask principal, rutas, lógica de autenticación y conexión a servicios.
-
 tasks.py: Definiciones de tareas Celery para procesamiento asíncrono.
-
 minio_client.py: Módulo para interactuar con MinIO/Ceph.
-
 kafka_producer.py: Módulo para producir mensajes a Kafka.
-
 db.py: Lógica de conexión y operaciones con la base de datos PostgreSQL. (Podrías considerar mover get_db_connection y la lógica de creación de tablas aquí)
-
 utils.py: Funciones de utilidad (ej. cifrado/descifrado).
-
 requirements.txt: Dependencias de Python para el backend y Celery.
-
 Dockerfile: Define la imagen Docker para el Celery worker.
 
 frontend/ (Si existe): Contiene el código de la interfaz de usuario.
+![image](https://github.com/user-attachments/assets/996b4710-2a36-4a03-bfd7-1f3166afb0d6)
 
 🚀 Uso de la API (Ejemplos con Postman/cURL)
 La API opera en http://127.0.0.1:5000.
+
+![image](https://github.com/user-attachments/assets/d64c2d54-f6b6-43f1-802b-ee6f7816d0eb)
+
 
 1. Subir un Archivo (POST)
 Sube un archivo, cifrándolo y almacenando sus metadatos.
@@ -161,16 +148,15 @@ URL: http://127.0.0.1:5000/vault/upload
 Método: POST
 
 Headers:
-
 Content-Type: multipart/form-data
 
 Body (form-data):
-
 file: Selecciona el archivo que deseas subir.
-
 user_id: [ID del usuario que sube el archivo, ej., default_user]
-
 original_filename: [Nombre original del archivo, ej., documento.pdf]
+
+![image](https://github.com/user-attachments/assets/fa158202-4532-42aa-aecc-62a2d50271ef)
+
 
 2. Obtener Metadatos de un Archivo (GET)
 Recupera los metadatos de un archivo específico.
@@ -181,6 +167,9 @@ Método: GET
 
 Ejemplo: http://127.0.0.1:5000/vault/metadata/a0fb4e20-9440-4d15-94df-979f8f42a2a3?user_id=default_user
 
+![image](https://github.com/user-attachments/assets/c4752147-5ef5-4e2c-8411-48d6fc4b329a)
+
+
 3. Descargar un Archivo (GET)
 Descarga un archivo previamente subido, que será descifrado al vuelo.
 
@@ -189,6 +178,9 @@ URL: http://127.0.0.1:5000/vault/{file_id}?user_id=[user_id]
 Método: GET
 
 Ejemplo: http://127.0.0.1:5000/vault/a0fb4e20-9440-4d15-94df-979f8f42a2a3?user_id=default_user
+
+![image](https://github.com/user-attachments/assets/5bb6f300-a33b-44ad-99f4-983ab8817b52)
+
 
 4. Listar Archivos por Usuario (GET)
 Obtiene una lista de todos los archivos asociados a un user_id específico.
